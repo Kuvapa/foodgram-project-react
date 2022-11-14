@@ -35,6 +35,15 @@ class User(AbstractUser):
     )
     password = models.CharField(max_length=150)
 
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+        'email',
+        'password'
+    ]
+    USERNAME_FIELD = 'email'
+
     class Meta:
         """Meta for User."""
 
@@ -48,7 +57,7 @@ class User(AbstractUser):
 class Follow(models.Model):
     """Модель фоллова."""
 
-    user = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='follower',
@@ -64,5 +73,9 @@ class Follow(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["user", "following"],
-                                    name="user_following")
+                                    name="user_following"),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('following')),
+                name='not_self_following_author'
+            )
         ]

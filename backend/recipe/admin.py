@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .models import (ShoppingCart, Favorite, Ingredients, RecipesIngredients,
                      Recipe, Tags)
@@ -12,9 +13,17 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TagsAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug',)
+    list_display = ('name', 'colored', 'slug',)
     search_fields = ('name', 'slug')
     empty_value_display = '-пусто-'
+
+    @admin.display
+    def colored(self, obj):
+        return format_html(
+            f'<span style="background: {obj.color};'
+            f'color: {obj.color}";>___________</span>'
+        )
+    colored.short_description = 'цвет'
 
 
 class IngredientsAdmin(admin.ModelAdmin):

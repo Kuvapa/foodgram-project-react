@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from djoser.views import UserViewSet
 from django.db.models import Sum
 from django.http import HttpResponse
 from rest_framework.permissions import (
@@ -15,8 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 from .permissions import IsAuthor
-from .pagination import RecipePagination
-from users.models import Follow
+from rest_framework.pagination import LimitOffsetPagination
 from .filters import RecipeFilter, IngredientSearchFilter
 from recipe.models import (
     Ingredients,
@@ -32,7 +30,7 @@ from .serializers import (
     IngridientsSerializer,
     TagSerializer,
     FavoriteSerializer,
-    # CustomUserSerializer,
+    UserSerializer,
     ShoppingCartSerializer,
     FollowSerializer,
 )
@@ -41,8 +39,12 @@ from .serializers import (
 User = get_user_model()
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет пользователя."""
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = LimitOffsetPagination
 
     @action(
         methods=('GET'),
@@ -53,13 +55,6 @@ class UserViewSet(UserViewSet):
     def subscriptions(self, request):
         return User.objects.filter(following__user=self.request.user)
 
-        # followers = [
-        #    f.user for f in self.get_object_or_404
-        #    (User, id=self.user.id).author.following.all()
-        # ]
-        # return Response(CustomUserSerializer(followers, many=True).data,
-        #                status=status.HTTP_200_OK)
-
     @action(
         methods=('POST', 'DELETE'),
         detail=True,
@@ -67,14 +62,14 @@ class UserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated, ]
     )
     def subscribe(self, id, serializer, request):
-        following = get_object_or_404(Follow, pk=id)
+        author = get_object_or_404(User, pk=id)
         if self.request.method == 'POST':
-            Follow.object.create(user=self.request.user, following=following)
+            request.user.following.add(author)
             return Response(
                 data=FollowSerializer.data,
                 status=status.HTTP_201_OK
             )
-        Follow.object.delete(user=self.request.user, following=following)
+        request.user.following.remove(author)
         return Response(
             data=FollowSerializer.data,
             status=status.HTTP_204_NO_CONTENT
@@ -105,7 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthor)
     filterset_class = RecipeFilter
-    pagination_class = RecipePagination
+    pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend, ]
     ordering_fields = ('pub_date',)
 
