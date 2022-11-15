@@ -39,7 +39,6 @@ class User(AbstractUser):
         'username',
         'first_name',
         'last_name',
-        'email',
         'password'
     ]
     USERNAME_FIELD = 'email'
@@ -72,10 +71,10 @@ class Follow(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["user", "following"],
+            models.UniqueConstraint(fields=["author", "following"],
                                     name="user_following"),
             models.CheckConstraint(
-                check=~models.Q(user=models.F('following')),
+                check=~models.Q(author=models.F('following')),
                 name='not_self_following_author'
             )
         ]

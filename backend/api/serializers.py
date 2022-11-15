@@ -4,6 +4,7 @@ from recipe.models import Ingredients, Tag, Recipe, Favorite, ShoppingCart
 from users.models import User, Follow
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class UserSerializer(UserSerializer):
@@ -23,10 +24,10 @@ class UserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
             return False
-        return user.following.filter(author=obj).exists()
+        return request.user.following.filter(author=obj).exists()
 
 
 class IngridientsSerializer(serializers.ModelSerializer):
@@ -75,7 +76,7 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
         for ingredient in ingredients:
             imgredient_list = []
             ingredient, _ = Ingredients.objects.get_or_create(**ingredients)
-            imgredient_list.append(tag)
+            imgredient_list.append(ingredient)
             recipe.ingredients.set(imgredient_list)
 
         return recipe
@@ -124,17 +125,17 @@ class RecipeReadSerializzer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def get_is_favorited(self, request, obj):
-        if not request.user.is_authenticated:
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
             return False
-        return (Favorite.objects.filter(user=self.context['request'].user,
-                                        recipe=obj).exists())
+        return request.user.favorite_user.filter(recipe=obj).exists()
 
-    def get_is_in_shopping_cart(self, request, obj):
-        if not request.user.is_authenticated:
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
             return False
-        return (ShoppingCart.objects.filter(user=self.context['request'].user,
-                                            recipe=obj).exists())
+        return request.user.cart.filter(recipe=obj).exists()
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -162,7 +163,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowSerializer(serializers.ModelSerializer):
+class FollowSerializer(UserSerializer):
     """Сериализатор подписок."""
 
     is_subscribed = serializers.SerializerMethodField(
@@ -174,8 +175,9 @@ class FollowSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Follow
-        fields = ('user', 'following')
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -183,18 +185,40 @@ class FollowSerializer(serializers.ModelSerializer):
             return False
         return user.following.filter(author=obj).exists()
 
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        if not request.user.is_anonymous:
-            context = {'request': request}
-            recipes_limit = request.query_params.get('recipes_limit')
-        else:
-            return False
-        if recipes_limit is not None:
-            recipes = obj.recipes.all()[:int(recipes_limit)]
-        else:
-            recipes = obj.recipes.all()
-        return ShortRecipeSerializer(recipes, many=True, context=context).data
+    def get_recipes(self, author):
+        queryset = self.context.get('request')
+        recipes_limit = queryset.query_params.get('recipes_limit')
+        if not recipes_limit:
+            return ShortRecipeSerializer(
+                Recipe.objects.filter(author=author),
+                many=True, context={'request': queryset}
+            ).data
+        return ShortRecipeSerializer(
+            Recipe.objects.filter(author=author)[:int(recipes_limit)],
+            many=True,
+            context={'request': queryset}
+        ).data
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    def get_recipes_count(self, author):
+        return Recipe.objects.filter(author=author).count()
+
+
+class FollowSubSerializer(serializers.ModelSerializer):
+    """Сериализатор подписки и отписки."""
+
+    class Meta:
+        model = Follow
+        fields = ('author', 'following')
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('author', 'following')
+            )
+        ]
+
+    def to_representation(self, instance):
+        return FollowSerializer(
+            instance.following,
+            context={'request': self.context.get('request')}
+        ).data

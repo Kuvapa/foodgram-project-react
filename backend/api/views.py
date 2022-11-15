@@ -12,10 +12,10 @@ from rest_framework.permissions import (
 )
 from django_filters.rest_framework import DjangoFilterBackend
 
-
+from .pagination import CustomPagination
 from .permissions import IsAuthor
-from rest_framework.pagination import LimitOffsetPagination
 from .filters import RecipeFilter, IngredientSearchFilter
+from users.models import Follow
 from recipe.models import (
     Ingredients,
     Tag,
@@ -33,27 +33,36 @@ from .serializers import (
     UserSerializer,
     ShoppingCartSerializer,
     FollowSerializer,
+    FollowSubSerializer
 )
 
 
 User = get_user_model()
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.GenericViewSet):
     """Вьюсет пользователя."""
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-    pagination_class = LimitOffsetPagination
+    serializer_class = FollowSerializer
+    pagination_class = CustomPagination
 
     @action(
         methods=('GET'),
-        detail=True,
+        detail=False,
         url_path='subscriptions',
         permission_classes=[IsAuthenticated, ]
     )
     def subscriptions(self, request):
-        return User.objects.filter(following__user=self.request.user)
+        subscriptions_list = self.paginate_queryset(
+            self.request.following.subscribe.all()
+        )
+        serializer = FollowSerializer(
+            subscriptions_list, many=True, context={
+                'request': request
+            }
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(
         methods=('POST', 'DELETE'),
@@ -61,19 +70,25 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='subscribe',
         permission_classes=[IsAuthenticated, ]
     )
-    def subscribe(self, id, serializer, request):
-        author = get_object_or_404(User, pk=id)
+    def subscribe(self, request, pk):
+        author = request.user
+        following = get_object_or_404(User, id=pk)
         if self.request.method == 'POST':
-            request.user.following.add(author)
-            return Response(
-                data=FollowSerializer.data,
-                status=status.HTTP_201_OK
+            data = {'author': author.id, 'following': pk}
+            serializer = FollowSubSerializer(
+                data=data,
+                context={'request': request}
             )
-        request.user.following.remove(author)
-        return Response(
-            data=FollowSerializer.data,
-            status=status.HTTP_204_NO_CONTENT
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        following = get_object_or_404(
+            Follow,
+            author=author,
+            following=following
         )
+        following.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -90,7 +105,8 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredients.objects.all()
     serializer_class = IngridientsSerializer
     permission_classes = (AllowAny, )
-    filter_backends = IngredientSearchFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientSearchFilter
     search_fields = ('^name',)
 
 
@@ -98,9 +114,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет рецептов."""
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthor)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthor, )
     filterset_class = RecipeFilter
-    pagination_class = LimitOffsetPagination
+    pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, ]
     ordering_fields = ('pub_date',)
 
@@ -118,7 +134,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True,
         permission_classes=[IsAuthenticated, ]
     )
-    def favorite(self, request, serializer, pk):
+    def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         if self.request.method == 'POST':
             Favorite.object.create(recipe=recipe, user=request.user)
@@ -138,7 +154,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True,
         permission_classes=[IsAuthenticated, ]
     )
-    def shopping_cart(self, request, serializer, pk):
+    def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         if self.request.method == 'POST':
             ShoppingCart.object.create(recipe=recipe, user=request.user)

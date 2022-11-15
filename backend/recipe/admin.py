@@ -2,17 +2,24 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import (ShoppingCart, Favorite, Ingredients, RecipesIngredients,
-                     Recipe, Tags)
+                     Recipe, Tag)
+
+
+class IngredientInRecipeInline(admin.TabularInline):
+    model = RecipesIngredients
+    extra = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name', 'image', 'text', 'cooking_time',)
+    list_display = ('id', 'author', 'name', 'image', 'text', 'cooking_time',)
     search_fields = ('name', 'author', 'tags',)
     list_filter = ('name', 'author', 'tags',)
-    empty_value_display = '-пусто-'
+    inlines = (IngredientInRecipeInline, )
+    empty_value_display = '-0-'
+    exclude = ('ingredients', )
 
 
-class TagsAdmin(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'colored', 'slug',)
     search_fields = ('name', 'slug')
     empty_value_display = '-пусто-'
@@ -30,11 +37,11 @@ class IngredientsAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'
+    empty_value_display = '-0-'
 
 
 class RecipesIngredientsAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount',)
+    list_display = ('ingredient', 'amount',)
 
 
 class FavoriteAdmin(admin.ModelAdmin):
@@ -42,12 +49,12 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe',)
+    list_display = ('users', 'recipes',)
 
 
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(ShoppingCart, ShoppingCartAdmin)
 admin.site.register(RecipesIngredients, RecipesIngredientsAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Tags, TagsAdmin)
+admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredients, IngredientsAdmin)

@@ -12,12 +12,19 @@ class Ingredients(models.Model):
     name = models.CharField(
         max_length=200,
         unique=True,
+        verbose_name='Название ингредиента'
     )
     measurement_unit = models.CharField(
         max_length=200,
         verbose_name='Единицы измерений',
         help_text='Указать единицы измерений: килограмм или кг'
     )
+
+    class Meta:
+
+        def __str__(self):
+            """__str__ for Title."""
+            return self.name
 
 
 class Tag(models.Model):
@@ -42,13 +49,20 @@ class Tag(models.Model):
         unique=True
     )
 
+    class Meta:
+
+        def __str__(self):
+            """__str__ for Title."""
+            return self.name
+
 
 class Recipe(models.Model):
     """Модель рецепта."""
 
     author = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Автор рецепта'
     )
     name = models.CharField(
         max_length=200,
@@ -57,7 +71,7 @@ class Recipe(models.Model):
         help_text='Введите название рецепта, не более 200 символов'
     )
     image = models.ImageField(
-        upload_to='recipe/',
+        upload_to='recipe/media/',
         verbose_name='Изображение готового блюда',
         help_text='Загрузите изображение готового блюда'
     )
@@ -95,26 +109,29 @@ class Recipe(models.Model):
 class RecipesIngredients(models.Model):
     """Связующая модель."""
 
-    recipe = models.ForeignKey(
+    formula = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCAD,
-        related_name='+'
+        on_delete=models.CASCADE,
+        related_name='+',
+        verbose_name='Рецепт'
     )
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredients,
         on_delete=models.CASCADE,
-        related_name='+'
+        related_name='+',
+        verbose_name='Ингредиент'
     )
     amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
         validators=[
-            MinValueValidator(1)
+            MinValueValidator(1, message='Количество не может быть меньше 1!')
         ]
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['ingredients', 'recipe'],
+                fields=['ingredient', 'formula'],
                 name='recipe_ingredient_unique',
             )
         ]
@@ -128,7 +145,11 @@ class Favorite(models.Model):
         on_delete=models.CASCADE,
         related_name='+'
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_user'
+    )
 
     class Meta:
         constraints = [
@@ -140,11 +161,12 @@ class Favorite(models.Model):
 class ShoppingCart(models.Model):
     """Модель корзины."""
 
-    recipe = models.ForeignKey(
+    recipes = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='+'
     )
-    user = models.ForeignKey(
+    users = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='cart'
@@ -152,6 +174,6 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["user", "recipe"],
-                                    name="user_recipe")
+            models.UniqueConstraint(fields=["users", "recipes"],
+                                    name="user_recipes")
         ]

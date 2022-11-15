@@ -15,7 +15,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ('user', 'following',)
+    list_display = ('author', 'following',)
 
 
 admin.site.register(User, UserAdmin)

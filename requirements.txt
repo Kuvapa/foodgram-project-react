@@ -8,3 +8,4 @@ django-colorfield
 webcolors
 djoser
 django-cors-headers
+drf-extra-fields
