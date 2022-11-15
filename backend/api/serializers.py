@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.following.filter(id=obj.pk).exists()
+        return request.user.following.filter(author_id=obj.pk).exists()
 
 
 class IngridientsSerializer(serializers.ModelSerializer):
@@ -136,7 +136,7 @@ class RecipeReadSerializzer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.cart.filter(recipe=obj).exists()
+        return request.user.cart.filter(recipes=obj).exists()
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
