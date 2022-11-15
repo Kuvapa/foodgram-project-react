@@ -30,7 +30,6 @@ from .serializers import (
     IngridientsSerializer,
     TagSerializer,
     FavoriteSerializer,
-    UserSerializer,
     ShoppingCartSerializer,
     FollowSerializer,
     FollowSubSerializer
@@ -48,16 +47,16 @@ class UserViewSet(viewsets.GenericViewSet):
     pagination_class = CustomPagination
 
     @action(
-        methods=('GET'),
+        methods=('GET', ),
         detail=False,
         url_path='subscriptions',
         permission_classes=[IsAuthenticated, ]
     )
     def subscriptions(self, request):
         subscriptions_list = self.paginate_queryset(
-            self.request.following.subscribe.all()
+            self.request.user.follower.all()
         )
-        serializer = FollowSerializer(
+        serializer = FollowSubSerializer(
             subscriptions_list, many=True, context={
                 'request': request
             }
@@ -65,7 +64,7 @@ class UserViewSet(viewsets.GenericViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(
-        methods=('POST', 'DELETE'),
+        methods=('POST', 'DELETE', ),
         detail=True,
         url_path='subscribe',
         permission_classes=[IsAuthenticated, ]
