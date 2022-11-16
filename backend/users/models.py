@@ -7,6 +7,13 @@ from django.db import models
 class User(AbstractUser):
     """Модель пользователя."""
 
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+    ]
+    USERNAME_FIELD = 'email'
+
     email = models.EmailField(
         unique=True,
         max_length=254,
@@ -34,14 +41,6 @@ class User(AbstractUser):
         verbose_name='Фамилия',
     )
     password = models.CharField(max_length=150)
-
-    REQUIRED_FIELDS = [
-        'username',
-        'first_name',
-        'last_name',
-        'password'
-    ]
-    USERNAME_FIELD = 'email'
 
     class Meta:
         """Meta for User."""

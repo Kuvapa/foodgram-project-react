@@ -1,7 +1,7 @@
-from django.db import models
 from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
+from django.db import models
 
 User = get_user_model()
 
@@ -161,12 +161,12 @@ class Favorite(models.Model):
 class ShoppingCart(models.Model):
     """Модель корзины."""
 
-    recipes = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='+'
     )
-    users = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='cart'
@@ -174,6 +174,6 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["users", "recipes"],
+            models.UniqueConstraint(fields=["user", "recipe"],
                                     name="user_recipes")
         ]

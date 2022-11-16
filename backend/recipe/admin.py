@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import (ShoppingCart, Favorite, Ingredients, RecipesIngredients,
-                     Recipe, Tag)
+from .models import (Favorite, Ingredients, Recipe, RecipesIngredients,
+                     ShoppingCart, Tag)
 
 
 class IngredientInRecipeInline(admin.TabularInline):
@@ -49,7 +49,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('users', 'recipes',)
+    list_display = ('user', 'recipe',)
 
 
 admin.site.register(Favorite, FavoriteAdmin)
