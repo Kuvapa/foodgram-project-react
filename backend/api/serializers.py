@@ -60,12 +60,12 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
         model = Recipe
         fields = ('ingredients', 'tags', 'image', 'text', 'cooking_time',)
 
-    def adding_components(instance, items, model):
+    def adding_components(self, instance, items, model):
         updated_array = []
         for item in items:
             item, _ = model.objects.get_or_create(**items)
             updated_array.append(item)
-            instance.array.set(updated_array)
+        instance.array.set(updated_array)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
