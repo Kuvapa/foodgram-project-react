@@ -11,3 +11,4 @@ django-cors-headers
 drf-extra-fields
 gunicorn==20.1.0
 psycopg2-binary==2.8.6
+python-dotenv==0.19.0
