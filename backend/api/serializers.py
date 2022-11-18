@@ -2,7 +2,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipe.models import Favorite, Ingredients, Recipe, ShoppingCart, Tag
+from recipe.models import (Favorite, Ingredients, Recipe, RecipesIngredients,
+                           ShoppingCart, Tag)
 from users.models import Follow, User
 
 
@@ -48,6 +49,24 @@ class TagSerializer(serializers.ModelSerializer):
         fields = (
             'name', 'color', 'slug',
         )
+
+
+class RecipesIngredientsSeriliazers(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredients.objects.all())
+    name = serializers.ReadOnlyField()
+    measurement_unit = serializers.ReadOnlyField()
+    amount = serializers.PositiveSmallIntegerField()
+
+    class Meta:
+        model = RecipesIngredients
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+    def validate_amount(self, value):
+        if int(value) < 1:
+            raise serializers.ValidationError(
+                'Количество ингредиента должно быть больше нуля!'
+            )
+        return value
 
 
 class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
@@ -100,7 +119,9 @@ class RecipeReadSerializzer(serializers.ModelSerializer):
 
     author = UserSerializer(read_only=True)
     tags = TagSerializer(read_only=True, many=True)
-    ingredients = IngridientsSerializer(read_only=True, many=True)
+    ingredients = serializers.SerializerMethodField(
+        read_only=True
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -108,6 +129,10 @@ class RecipeReadSerializzer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
+
+    def get_ingredients(self, obj):
+        ingredients = RecipesIngredients.objects.filter(formula=obj)
+        return RecipesIngredientsSeriliazers(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
