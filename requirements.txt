@@ -9,3 +9,5 @@ webcolors
 djoser
 django-cors-headers
 drf-extra-fields
+gunicorn==20.1.0
+psycopg2-bin

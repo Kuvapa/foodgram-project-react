@@ -71,22 +71,9 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         image = validated_data.pop('image')
-        recipe = Recipe.object.create(image=image, **validated_data)
-
+        recipe = Recipe.objects.create(image=image, **validated_data)
         self.adding_components(recipe, tags, Tag)
         self.adding_components(recipe, ingredients, Ingredients)
-        # for tag in tags:
-        #    tag_list = []
-        #    tag, _ = Tag.objects.get_or_create(**tag)
-        #    tag_list.append(tag)
-        #    recipe.tags.set(tag_list)
-
-        # for ingredient in ingredients:
-        #    ingredient_list = []
-        #    ingredient, _ = Ingredients.objects.get_or_create(**ingredients)
-        #    ingredient_list.append(ingredient)
-        #    recipe.ingredients.set(ingredient_list)
-
         return recipe
 
     def update(self, instance, validated_data):
@@ -97,26 +84,12 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
             'cooking_time',
             instance.cooking_time
         )
-
         if 'ingredients' in validated_data:
             ingredients = validated_data.pop('ingredients')
             self.adding_components(instance, ingredients, Ingredients)
-        #    ingredients_list = []
-        #    for ingredient in ingredients:
-        #        ingredient, _ = (
-        #            Ingredients.objects.get_or_create(**ingredients)
-        #        )
-        #        ingredients_list.append(ingredient)
-        #    instance.ingredients.set(ingredients_list)
-
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             self.adding_components(instance, tags, Tag)
-        #    tag_list = []
-        #    for tag in tags:
-        #        tag, _ = Tag.objects.get_or_create(**tags)
-        #        tag_list.append(tag)
-        #    instance.tags.set(tag_list)
         instance.save()
         return instance
 
