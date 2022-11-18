@@ -10,7 +10,7 @@
 ## Технологии:
 Python 3.7, Django 2.2, DRF, Djoser, PostgreSQL, Docker
 
-[![Workflow status](https://github.com/Kuvapa/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?event=workflow_run)](https://github.com/Kuvapa/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
+[![Foodgram-app workflow](https://github.com/Kuvapa/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/Kuvapa/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
 
 <details>
 <summary><h2>Как запустить проект:</h2></summary>
