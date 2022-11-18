@@ -22,6 +22,7 @@ from .serializers import (CreateUpdateRecipeSerialiazer, FavoriteSerializer,
 
 User = get_user_model()
 
+
 class UserViewSet(viewsets.GenericViewSet):
     """Вьюсет пользователя."""
 
