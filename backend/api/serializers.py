@@ -54,7 +54,7 @@ class RecipesIngredientsSeriliazers(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredients.objects.all())
     name = serializers.ReadOnlyField()
     measurement_unit = serializers.ReadOnlyField()
-    amount = serializers.PositiveSmallIntegerField()
+    amount = serializers.IntegerField()
 
     class Meta:
         model = RecipesIngredients
