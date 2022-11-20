@@ -87,7 +87,6 @@ class IngredientsViewSet(viewsets.ModelViewSet):
 
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
-    permission_classes = (IsAdminOrReadOnly, )
     pagination_class = None
     filterset_class = IngredientSearchFilter
     search_fields = ('^name',)
