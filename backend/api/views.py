@@ -67,7 +67,7 @@ class UserViewSet(viewsets.GenericViewSet):
         following = get_object_or_404(
             Follow,
             author=author,
-            following=request.user.id
+            following=request.user
         )
         following.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
