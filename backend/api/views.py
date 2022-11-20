@@ -53,8 +53,8 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path='subscribe',
         permission_classes=[IsAuthenticated, ]
     )
-    def subscribe(self, request, id):
-        author = get_object_or_404(User, id=id)
+    def subscribe(self, request, pk):
+        author = get_object_or_404(User, id=pk)
         if self.request.method == 'POST':
             data = {'author': id, 'following': request.user.id}
             serializer = FollowSubSerializer(
