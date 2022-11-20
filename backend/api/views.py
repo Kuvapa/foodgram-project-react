@@ -38,7 +38,7 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def subscriptions(self, request):
         subscriptions_list = self.paginate_queryset(
-            self.request.user.follower.all()
+            self.request.user.following.all()
         )
         serializer = FollowSubSerializer(
             subscriptions_list, many=True, context={
