@@ -17,7 +17,7 @@ from .pagination import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsAuthor
 from .serializers import (CreateUpdateRecipeSerialiazer, FavoriteSerializer,
                           FollowSerializer, FollowSubSerializer,
-                          IngredientsSerializer, RecipeReadSerializzer,
+                          IngredientsSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer)
 
 User = get_user_model()
@@ -107,7 +107,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
-            return RecipeReadSerializzer
+            return RecipeReadSerializer
         return CreateUpdateRecipeSerialiazer
 
     def perform_create(self, serializer, request):
