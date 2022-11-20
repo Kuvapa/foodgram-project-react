@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from recipe.models import (Favorite, Ingredients, Recipe, RecipesIngredients,
                            ShoppingCart, Tag)
 from rest_framework import status, viewsets
@@ -90,7 +89,6 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientsSerializer
     permission_classes = (IsAdminOrReadOnly, )
     pagination_class = None
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientSearchFilter
     search_fields = ('^name',)
 
@@ -102,7 +100,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthor, )
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend, ]
     ordering_fields = ('pub_date',)
 
     def get_serializer_class(self):

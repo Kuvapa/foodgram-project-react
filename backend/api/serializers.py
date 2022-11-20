@@ -124,7 +124,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     @staticmethod
-    def get_ingredients(self, obj):
+    def get_ingredients(obj):
         ingredients = RecipesIngredients.objects.filter(formula=obj)
         return RecipesIngredientsSeriliazers(ingredients, many=True).data
 
