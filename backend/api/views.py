@@ -54,9 +54,10 @@ class UserViewSet(viewsets.GenericViewSet):
         permission_classes=[IsAuthenticated, ]
     )
     def subscribe(self, request, pk):
+        following = request.user
         author = get_object_or_404(User, id=pk)
         if self.request.method == 'POST':
-            data = {'author': id, 'following': request.user.id}
+            data = {'author': pk, 'following': following.id}
             serializer = FollowSubSerializer(
                 data=data,
                 context={'request': request}
@@ -67,7 +68,7 @@ class UserViewSet(viewsets.GenericViewSet):
         following = get_object_or_404(
             Follow,
             author=author,
-            following=request.user
+            following=following
         )
         following.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
