@@ -17,7 +17,7 @@ from .pagination import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsAuthor
 from .serializers import (CreateUpdateRecipeSerialiazer, FavoriteSerializer,
                           FollowSerializer, FollowSubSerializer,
-                          IngridientsSerializer, RecipeReadSerializzer,
+                          IngredientsSerializer, RecipeReadSerializzer,
                           ShoppingCartSerializer, TagSerializer)
 
 User = get_user_model()
@@ -87,7 +87,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     """Вьюсет ингредиентов."""
 
     queryset = Ingredients.objects.all()
-    serializer_class = IngridientsSerializer
+    serializer_class = IngredientsSerializer
     permission_classes = (IsAdminOrReadOnly, )
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
