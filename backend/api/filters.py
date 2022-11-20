@@ -13,7 +13,8 @@ class RecipeFilter(filters.FilterSet):
         field_name='tags__slug',
         to_field_name='slug',
         lookup_expr='icontains',
-        queryset=Tag.objects.all()
+        queryset=Tag.objects.all(),
+        label='Tags'
     )
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')
     is_in_shopping_cart = filters.BooleanFilter(
