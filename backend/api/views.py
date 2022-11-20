@@ -54,7 +54,6 @@ class UserViewSet(viewsets.GenericViewSet):
         permission_classes=[IsAuthenticated, ]
     )
     def subscribe(self, request, pk):
-        following = request.user
         author = get_object_or_404(User, id=pk)
         if self.request.method == 'POST':
             data = {'author': pk, 'following': following.id}
