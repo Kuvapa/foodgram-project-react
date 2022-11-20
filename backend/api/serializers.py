@@ -61,7 +61,7 @@ class RecipesIngredientsSeriliazers(serializers.ModelSerializer):
         read_only=True
     )
     name = serializers.SlugRelatedField(
-        source='ingredient.name',
+        source='ingredient',
         slug_field='name',
         read_only=True,
     )
