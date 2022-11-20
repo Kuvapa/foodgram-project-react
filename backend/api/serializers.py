@@ -1,3 +1,4 @@
+from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 from recipe.models import (Favorite, Ingredients, Recipe, RecipesIngredients,
                            ShoppingCart, Tag)
@@ -183,6 +184,7 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
             )
         return data
 
+    @atomic
     def create(self, validated_data):
         request = self.context.get('request')
         ingredients = validated_data.pop('ingredients')
@@ -195,6 +197,7 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
         recipe.tags.set(tags)
         return recipe
 
+    @atomic
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         recipe = instance
