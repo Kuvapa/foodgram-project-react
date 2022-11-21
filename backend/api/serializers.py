@@ -170,15 +170,7 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Нужно выбрать хотя бы 1 ингредиент'
-            )
         ingredients_list = []
-        if not ingredients_list:
-            raise serializers.ValidationError(
-                'Нужно выбрать хотя бы 1 ингредиент'
-            )
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
             if ingredient_id in ingredients_list:
@@ -186,6 +178,10 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
                     'Есть повторяющиеся ингредиенты!'
                 )
             ingredients_list.append(ingredient_id)
+        if not ingredients_list:
+            raise serializers.ValidationError(
+                'Нужно выбрать хотя бы 1 ингредиент'
+            )
         if data['cooking_time'] <= 0:
             raise serializers.ValidationError(
                 'Время приготовления должно быть больше 0!'
