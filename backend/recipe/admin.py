@@ -40,10 +40,6 @@ class IngredientsAdmin(admin.ModelAdmin):
     empty_value_display = '-0-'
 
 
-class RecipesIngredientsAdmin(admin.ModelAdmin):
-    list_display = ('ingredient', 'amount',)
-
-
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
 
@@ -54,7 +50,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(ShoppingCart, ShoppingCartAdmin)
-admin.site.register(RecipesIngredients, RecipesIngredientsAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredients, IngredientsAdmin)

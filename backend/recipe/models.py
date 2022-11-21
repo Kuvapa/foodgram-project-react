@@ -20,11 +20,9 @@ class Ingredients(models.Model):
         help_text='Указать единицы измерений: килограмм или кг'
     )
 
-    class Meta:
-
-        def __str__(self):
-            """__str__ for Title."""
-            return self.name
+    def __str__(self):
+        """__str__ for Title."""
+        return self.name
 
 
 class Tag(models.Model):
@@ -49,11 +47,9 @@ class Tag(models.Model):
         unique=True
     )
 
-    class Meta:
-
-        def __str__(self):
-            """__str__ for Title."""
-            return self.name
+    def __str__(self):
+        """__str__ for Title."""
+        return self.name
 
 
 class Recipe(models.Model):
@@ -90,6 +86,12 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления блюда',
         help_text='Укажите время приготовления блюда в минутах',
+        validators=[
+            MinValueValidator(
+                1,
+                message='Время приготовления не может быть меньше 1 мин.'
+            )
+        ]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -133,7 +135,10 @@ class RecipesIngredients(models.Model):
             models.UniqueConstraint(
                 fields=['ingredient', 'formula'],
                 name='recipe_ingredient_unique',
-            )
+            ),
+            models.CheckConstraint(
+                check=models.Q(amount__gte=1),
+                name='amount_gte_1'),
         ]
 
 
