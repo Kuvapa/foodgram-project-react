@@ -95,7 +95,6 @@ SSH_KEY=SSHKey (для получения команда: cat ~/.ssh/id_rsa)
 docker-compose exec backend python manage.py makemigrations
 docker-compose exec backend python manage.py migrate
 docker-compose exec backend python manage.py collectstatic --no-input
-docker-compose exec backend python manage.py loaddata dump.json
 docker-compose exec backend python manage.py createsuperuser
 ```
 Для остановки контейнера `docker-compose down -v`
