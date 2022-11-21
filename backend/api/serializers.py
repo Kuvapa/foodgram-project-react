@@ -175,12 +175,12 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
                 'Нужно выбрать хотя бы 1 ингредиент'
             )
         ingredients_list = []
+        if not ingredients_list:
+            raise serializers.ValidationError(
+                'Нужно выбрать хотя бы 1 ингредиент'
+            )
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
-            if not ingredient_id:
-                raise serializers.ValidationError(
-                    'Нужно выбрать хотя бы 1 ингредиент'
-                )
             if ingredient_id in ingredients_list:
                 raise serializers.ValidationError(
                     'Есть повторяющиеся ингредиенты!'
