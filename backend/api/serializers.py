@@ -88,10 +88,6 @@ class AddIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount')
 
     def validate_amount(self, data):
-        if not id:
-            raise serializers.ValidationError(
-                'Выберите хотя бы один ингредиент!'
-            )
         if int(data) < 1:
             raise serializers.ValidationError({
                 'ingredients': (
@@ -174,6 +170,10 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Нужно выбрать хотя бы 1 ингредиент'
+            )
         ingredients_list = []
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
