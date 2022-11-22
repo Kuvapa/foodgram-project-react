@@ -178,10 +178,6 @@ class CreateUpdateRecipeSerialiazer(serializers.ModelSerializer):
                     'Есть повторяющиеся ингредиенты!'
                 )
             ingredients_list.append(ingredient_id)
-        if not data['ingredients_list']:
-            raise serializers.ValidationError(
-                'Нужно выбрать хотя бы 1 ингредиент'
-            )
         if data['cooking_time'] <= 0:
             raise serializers.ValidationError(
                 'Время приготовления должно быть больше 0!'
